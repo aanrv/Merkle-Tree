@@ -2,7 +2,7 @@
 #include <vector>
 #include <string>
 #include <crypto++/sha.h>	// SHA256
-#include <cryptopp/filters.h>	// StringSink, HashFilter
+#include <cryptopp/filters.h>	// sources, sinks, and filters
 #include <cryptopp/hex.h>	// HexEncoder
 
 using std::cout;
@@ -10,34 +10,42 @@ using std::cerr;
 using std::endl;
 using std::string;
 using std::vector;
+using std::array;
 
 using CryptoPP::SHA256;
+using CryptoPP::ArraySource;
 using CryptoPP::StringSource;
 using CryptoPP::HashFilter;
 using CryptoPP::HexEncoder;
+using CryptoPP::ArraySink;
 using CryptoPP::StringSink;
 
-vector<string> getHashes(vector<string> list);
+vector<array<byte, SHA256::DIGESTSIZE>> getHashes(vector<string> list);
 
 int main() {
-	vector<string> list;
-	list.push_back("c");
-	list.push_back("b");
-	list.push_back("a");
+	vector<string> items;
+	items.push_back("c");
+	items.push_back("b");
+	items.push_back("a");
 
-	vector<string> hashes = getHashes(list);
-	for (auto it = hashes.begin(); it != hashes.end(); ++it) cout << *it << endl;
+	vector<array<byte, SHA256::DIGESTSIZE>> hashes = getHashes(items);
+	for (auto it = hashes.begin(); it != hashes.end(); ++it) {
+		string hashHex;
+		// byte array to string
+		ArraySource s(it->data(), SHA256::DIGESTSIZE, true, new HexEncoder(new StringSink(hashHex)));
+		cout << hashHex << endl;
+	}
 }
 
-vector<string> getHashes(vector<string> list) {
+vector<array<byte, SHA256::DIGESTSIZE>> getHashes(vector<string> list) {
 	// store hashes in vector
-	vector<string> hashes;
+	vector<array<byte, SHA256::DIGESTSIZE>> hashes;
 	for (auto it = list.rbegin(); it != list.rend(); ++it) {
 		SHA256 hash;
-		string digest;
+		array<byte, SHA256::DIGESTSIZE> digest;
 
-		// sourceString | sha256 | hex > digest
-		StringSource s(*it, true, new HashFilter(hash, new HexEncoder(new StringSink(digest))));
+		// echo *it | hash > digest
+		StringSource s(*it, true, new HashFilter(hash, new ArraySink(digest.data(), SHA256::DIGESTSIZE)));
 		hashes.push_back(digest);
 	}
 	return hashes;
