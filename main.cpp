@@ -1,8 +1,9 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <algorithm>		// copy
 #include <crypto++/sha.h>	// SHA256
-#include <cryptopp/filters.h>	// sources, sinks, and filters
+#include <cryptopp/filters.h>	// sources, sinks, filters
 #include <cryptopp/hex.h>	// HexEncoder
 
 using std::cout;
@@ -11,6 +12,8 @@ using std::endl;
 using std::string;
 using std::vector;
 using std::array;
+using std::copy;
+using std::ostream;
 
 using CryptoPP::SHA256;
 using CryptoPP::ArraySource;
@@ -20,34 +23,120 @@ using CryptoPP::HexEncoder;
 using CryptoPP::ArraySink;
 using CryptoPP::StringSink;
 
-vector<array<byte, SHA256::DIGESTSIZE>> getHashes(vector<string> list);
+typedef string ItemType;
+typedef SHA256 HashFunction;
+const size_t HASHSIZE = SHA256::DIGESTSIZE;
+
+/* Given list of strings, returns a corresponding list of hashes */
+vector<array<byte, HASHSIZE>> getHashes(vector<ItemType> list);
+
+/* Calculates the merkle root of a list of hashes */
+array<byte, HASHSIZE> calculateMerkleRoot(vector<array<byte, HASHSIZE>> list);
+
+/* Converts a byte array to a hex string */
+string hashToHex(array<byte, HASHSIZE> hash);
+
+ostream& operator<<(ostream& os, vector<array<byte, HASHSIZE>> arr);
+
+ostream& operator<<(ostream& os, vector<string> v);
 
 int main() {
-	vector<string> items;
-	items.push_back("c");
-	items.push_back("b");
+	// create items
+	vector<ItemType> items;
 	items.push_back("a");
+	items.push_back("b");
+	items.push_back("c");
 
-	vector<array<byte, SHA256::DIGESTSIZE>> hashes = getHashes(items);
-	for (auto it = hashes.begin(); it != hashes.end(); ++it) {
-		string hashHex;
-		// byte array to string
-		ArraySource s(it->data(), SHA256::DIGESTSIZE, true, new HexEncoder(new StringSink(hashHex)));
-		cout << hashHex << endl;
-	}
+	// get hashes
+	vector<array<byte, HASHSIZE>> itemHashes = getHashes(items);
+
+	// print items and hashes
+	cout << "Items:\n" << items << endl;
+	cout << "Hashes:\n" << itemHashes << endl;
+
+	// get merkle root
+	array<byte, HASHSIZE> merkleRoot = calculateMerkleRoot(itemHashes);
+
+	// print hex string of merkle root
+	string rootHex;
+	ArraySource s(merkleRoot.data(), HASHSIZE, true, new HexEncoder(new StringSink(rootHex)));
+	cout << "Merkle Root: " << rootHex << endl;
 }
 
-vector<array<byte, SHA256::DIGESTSIZE>> getHashes(vector<string> list) {
-	// store hashes in vector
-	vector<array<byte, SHA256::DIGESTSIZE>> hashes;
-	for (auto it = list.rbegin(); it != list.rend(); ++it) {
-		SHA256 hash;
-		array<byte, SHA256::DIGESTSIZE> digest;
+vector<array<byte, HASHSIZE>> getHashes(vector<ItemType> list) {
+	// store hashes of items in a vector
+	vector<array<byte, HASHSIZE>> hashes;
+	for (auto it = list.begin(); it != list.end(); ++it) {
+		HashFunction hash;
+		array<byte, HASHSIZE> digest;
 
-		// echo *it | hash > digest
-		StringSource s(*it, true, new HashFilter(hash, new ArraySink(digest.data(), SHA256::DIGESTSIZE)));
+		// echo item | hash > digest
+		StringSource s(*it, true, new HashFilter(hash, new ArraySink(digest.data(), HASHSIZE)));
 		hashes.push_back(digest);
 	}
 	return hashes;
 }
 
+array<byte, HASHSIZE> calculateMerkleRoot(vector<array<byte, HASHSIZE>> hashes) {
+	cout << "Calculating merkle root:" << endl;
+	// if odd number of items, duplicate last one
+	if (hashes.size() % 2 == 1) hashes.push_back(hashes.back());
+	cout << hashes << endl;
+
+	// keep hashing in pairs until one item left
+	while (hashes.size() != 1) {
+
+		vector<array<byte, HASHSIZE>> tmp_hashes;
+
+		for (auto it = hashes.begin(); it != hashes.end(); it += 2) {
+			auto first = it;
+			auto second = it + 1;
+
+			// concat items and store in source
+			const size_t sourceLen = HASHSIZE * 2;
+			array<byte, sourceLen> source;
+			copy(first->begin(), first->end(), source.begin());
+			copy(second->begin(), second->end(), source.begin() + HASHSIZE);
+
+			// hash source to digest
+			array<byte, HASHSIZE> digest;
+			HashFunction hash;
+			ArraySource s(source.data(), sourceLen, true, new HashFilter(hash, new ArraySink(digest.data(), HASHSIZE)));
+
+			// save hash to temporary hash list
+			tmp_hashes.push_back(digest);
+		}
+		hashes = tmp_hashes;
+		cout << hashes << endl;
+	}
+
+	return hashes.back();
+}
+
+string hashToHex(array<byte, HASHSIZE> hash) {
+	string digest;
+	// data | hex > digest
+	ArraySource(hash.data(), HASHSIZE, true, new HexEncoder(new StringSink(digest)));
+	return digest;
+}
+
+ostream& operator<<(ostream& os, vector<array<byte, HASHSIZE>> arr) {
+	os << "[\n";
+	for (auto it = arr.begin(); it != arr.end(); ++it) {
+		os << "\t" << hashToHex(*it);
+		if (it + 1 != arr.end()) os << ",\n";
+	}
+	os << "\n]" << endl;
+	return os;
+}
+
+ostream& operator<<(ostream& os, vector<string> v) {
+	os << "[\n";
+	for (auto it = v.begin(); it != v.end(); ++it) {
+		os << "\t" << *it;
+		if (it + 1 != v.end()) os << ",\n";
+	}
+	os << "\n]" << endl;
+	return os;
+
+}
