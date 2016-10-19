@@ -40,26 +40,31 @@ ostream& operator<<(ostream& os, vector<array<byte, HASHSIZE>> arr);
 
 ostream& operator<<(ostream& os, vector<string> v);
 
-int main() {
-	// create items
+int main(int argc, char** argv) {
+	if (argc == 1) {
+		// is this the correct notation? hmm
+		cout << "Usage: " << argv[0] << " item1 [...]" << endl;
+		return EXIT_FAILURE;
+	}
+
+	// get items
 	vector<ItemType> items;
-	items.push_back("a");
-	items.push_back("b");
-	items.push_back("c");
+	for (int i = 1; i < argc; ++i) {
+		items.push_back(string(argv[i]));
+	}
 
 	// get hashes
 	vector<array<byte, HASHSIZE>> itemHashes = getHashes(items);
 
-	// print items and hashes
 	cout << "Items:\n" << items << endl;
 	cout << "Hashes:\n" << itemHashes << endl;
 
 	// get merkle root
 	array<byte, HASHSIZE> merkleRoot = calculateMerkleRoot(itemHashes);
 
-	// print hex string of merkle root
-	string rootHex;
-	ArraySource s(merkleRoot.data(), HASHSIZE, true, new HexEncoder(new StringSink(rootHex)));
+	// convert to hex for display
+	string rootHex = hashToHex(merkleRoot);
+
 	cout << "Merkle Root: " << rootHex << endl;
 }
 
