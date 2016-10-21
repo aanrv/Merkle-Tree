@@ -2,7 +2,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>		// copy
-#include <crypto++/sha.h>	// SHA256
+#include <cryptopp/sha.h>	// SHA256
 #include <cryptopp/filters.h>	// sources, sinks, filters
 #include <cryptopp/hex.h>	// HexEncoder
 
