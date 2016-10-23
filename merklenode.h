@@ -13,6 +13,8 @@ public:
 	MerkleNode(HashArray hash);
 	~MerkleNode();
 
+	HashArray getHash() const;
+
 	MerkleNode* left;
 	MerkleNode* right;
 private:

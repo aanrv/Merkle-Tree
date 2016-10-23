@@ -2,16 +2,16 @@
 
 MerkleNode::MerkleNode(MerkleNode::HashArray hash) {
 	this->hash = hash;
-	left = NULL;
-	right = NULL;
+	this->left = NULL;
+	this->right = NULL;
 }
 
 MerkleNode::~MerkleNode() {
-	if (left) delete left;
-	if (right) delete right;
+	if (this->left) delete this->left;
+	if (this->right) delete this->right;
 }
 
 MerkleNode::HashArray MerkleNode::getHash() const {
-	return hash;
+	return this->hash;
 }
 

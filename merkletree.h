@@ -9,6 +9,7 @@ class MerkleTree {
 public:
 	typedef std::string ItemType;
 
+	/* Precondition: items.size() = 2^b, where b is a positive integer */
 	MerkleTree(std::vector<ItemType> items);
 	~MerkleTree();
 
@@ -22,7 +23,7 @@ private:
 	MerkleNode* calculateNode(int distanceFromLeaves, std::vector<MerkleTree::ItemType>& items);
 
 	/* Given two hashes, concats them and calculates their hash */
-	MerkleNode::HashArray concatHash(MerkleNode::HashArray a, MerkleNode::HashArray b) const;
+	MerkleNode::HashArray concatHash(MerkleNode::HashArray first, MerkleNode::HashArray second) const;
 
 	MerkleNode* head;
 };

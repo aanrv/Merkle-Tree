@@ -2,9 +2,11 @@
 #include <vector>
 #include <string>
 #include <algorithm>		// copy
+#include <cmath>
 #include <cryptopp/sha.h>	// SHA256
 #include <cryptopp/filters.h>	// sources, sinks, filters
 #include <cryptopp/hex.h>	// HexEncoder
+#include "merkletree.h"
 
 using std::cout;
 using std::cerr;
@@ -23,9 +25,9 @@ using CryptoPP::HexEncoder;
 using CryptoPP::ArraySink;
 using CryptoPP::StringSink;
 
-typedef string ItemType;
-typedef SHA256 HashFunction;
-const size_t HASHSIZE = SHA256::DIGESTSIZE;
+typedef CryptoPP::SHA256 HashFunction;
+typedef std::string ItemType;
+const size_t HASHSIZE = CryptoPP::SHA256::DIGESTSIZE;
 
 /* Given list of strings, returns a corresponding list of hashes */
 vector<array<byte, HASHSIZE>> getHashes(vector<ItemType> list);
@@ -44,6 +46,9 @@ int main(int argc, char** argv) {
 	if (argc == 1) {
 		// is this the correct notation? hmm
 		cout << "Usage: " << argv[0] << " item1 [...]" << endl;
+		return EXIT_SUCCESS;
+	} else if (log2(argc - 1) != std::floor(log2(argc - 1))) {
+		cerr << "Number of items must be a power of 2.\nI know this is ridiculous; I'm working on it." << endl;
 		return EXIT_FAILURE;
 	}
 
@@ -53,19 +58,14 @@ int main(int argc, char** argv) {
 		items.push_back(string(argv[i]));
 	}
 
+	// create tree
+	MerkleTree testTree(items);
+	// get merkle root
+	cout << hashToHex(testTree.getMerkleRoot()) << endl;
+
 	// get hashes
 	vector<array<byte, HASHSIZE>> itemHashes = getHashes(items);
-
-	cout << "Items:\n" << items << endl;
-	cout << "Hashes:\n" << itemHashes << endl;
-
-	// get merkle root
-	array<byte, HASHSIZE> merkleRoot = calculateMerkleRoot(itemHashes);
-
-	// convert to hex for display
-	string rootHex = hashToHex(merkleRoot);
-
-	cout << "Merkle Root: " << rootHex << endl;
+	cout << hashToHex(calculateMerkleRoot(itemHashes)) << endl;
 }
 
 vector<array<byte, HASHSIZE>> getHashes(vector<ItemType> list) {
@@ -120,7 +120,6 @@ array<byte, HASHSIZE> calculateMerkleRoot(vector<array<byte, HASHSIZE>> hashes) 
 
 string hashToHex(array<byte, HASHSIZE> hash) {
 	string digest;
-	// data | hex > digest
 	ArraySource(hash.data(), HASHSIZE, true, new HexEncoder(new StringSink(digest)));
 	return digest;
 }
