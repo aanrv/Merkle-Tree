@@ -1,10 +1,7 @@
 #include <iostream>
+#include <cryptopp/hex.h>
 #include <vector>
 #include <string>
-#include <algorithm>		// copy
-#include <cryptopp/sha.h>	// SHA256
-#include <cryptopp/filters.h>	// sources, sinks, filters
-#include <cryptopp/hex.h>	// HexEncoder
 #include "merkletree.h"
 
 using std::cout;
@@ -15,14 +12,6 @@ using std::vector;
 using std::array;
 using std::copy;
 using std::ostream;
-
-using CryptoPP::SHA256;
-using CryptoPP::ArraySource;
-using CryptoPP::StringSource;
-using CryptoPP::HashFilter;
-using CryptoPP::HexEncoder;
-using CryptoPP::ArraySink;
-using CryptoPP::StringSink;
 
 /* Converts a byte array to a hex string */
 string hashToHex(array<byte, MerkleNode::HASHSIZE> hash);
@@ -70,7 +59,7 @@ int main(int argc, char** argv) {
 
 string hashToHex(array<byte, MerkleNode::HASHSIZE> hash) {
 	string digest;
-	ArraySource(hash.data(), MerkleNode::HASHSIZE, true, new HexEncoder(new StringSink(digest)));
+	CryptoPP::ArraySource(hash.data(), MerkleNode::HASHSIZE, true, new CryptoPP::HexEncoder(new CryptoPP::StringSink(digest)));
 	return digest;
 }
 
