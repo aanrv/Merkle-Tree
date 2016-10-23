@@ -65,6 +65,14 @@ bool MerkleTree::findHash(MerkleNode::HashArray hash, MerkleNode* tree, std::vec
 	}
 }
 
+bool MerkleTree::itemExists(ItemType item) const {
+	MerkleNode::HashArray hash;
+	MerkleNode::HashFunction func;
+	StringSource(item, true, new HashFilter(func, new ArraySink(hash.data(), MerkleNode::HASHSIZE)));
+	// probably overkill at !getMerklePath.empty() but more elegant than performing another search, hmmm
+	return this->head->getHash() == hash || !getMerklePath(item).empty();
+}
+
 MerkleNode* MerkleTree::createTree(size_t treeHeight, std::vector<MerkleTree::ItemType>& items) {
 	if (treeHeight == 1 && !items.empty()) {
 	// if items remain in list, create a leaf node here

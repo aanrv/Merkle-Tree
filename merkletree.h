@@ -18,6 +18,8 @@ public:
 
 	/* Retrieve merkle path of element. Returns empty vector if single element or element does not exist. */
 	std::vector<MerkleNode::HashArray> getMerklePath(ItemType item) const;
+
+	bool itemExists(ItemType item) const;
 private:
 	/* Given a list of items and a position within a tree, calculates the hash and creates a node. */
 	MerkleNode* createTree(size_t treeHeight, std::vector<MerkleTree::ItemType>& items);

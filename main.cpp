@@ -51,6 +51,12 @@ int main(int argc, char** argv) {
 		// get merkle root
 		cout << "Merkle Root: " << hashToHex(testTree.getMerkleRoot()) << endl;
 
+		// verify existence
+		// unable to verify existence.
+		// are we living in a simulation? is free-will an illusion? is there an alternate universe without pain, sorrow, and segmentation faults?
+		if (testTree.itemExists(argv[1])) cout << "Item: " << argv[1] << " exists." << endl;
+		else cout << "Item: " << argv[1] << " does not exist." << endl;
+
 		// get merkle path
 		cout << "Getting merkle path for: " << argv[1] << endl;
 		cout << testTree.getMerklePath(argv[1]) << endl;
