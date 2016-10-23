@@ -47,9 +47,6 @@ int main(int argc, char** argv) {
 		// is this the correct notation? hmm
 		cout << "Usage: " << argv[0] << " item1 [...]" << endl;
 		return EXIT_SUCCESS;
-	} else if (log2(argc - 1) != std::floor(log2(argc - 1))) {
-		cerr << "Number of items must be a power of 2.\nI know this is ridiculous; I'm working on it." << endl;
-		return EXIT_FAILURE;
 	}
 
 	// get items
@@ -59,9 +56,9 @@ int main(int argc, char** argv) {
 	}
 
 	// create tree
-	MerkleTree testTree(items);
+//	MerkleTree testTree(items);
 	// get merkle root
-	cout << hashToHex(testTree.getMerkleRoot()) << endl;
+//	cout << hashToHex(testTree.getMerkleRoot()) << endl;
 
 	// get hashes
 	vector<array<byte, HASHSIZE>> itemHashes = getHashes(items);
@@ -85,12 +82,11 @@ vector<array<byte, HASHSIZE>> getHashes(vector<ItemType> list) {
 array<byte, HASHSIZE> calculateMerkleRoot(vector<array<byte, HASHSIZE>> hashes) {
 	cout << "Calculating merkle root:" << endl;
 	// if odd number of items, duplicate last one
-	if (hashes.size() % 2 == 1) hashes.push_back(hashes.back());
 	cout << hashes << endl;
 
 	// keep hashing in pairs until one item left
 	while (hashes.size() != 1) {
-
+		if (hashes.size() % 2 == 1) hashes.push_back(hashes.back());
 		vector<array<byte, HASHSIZE>> tmp_hashes;
 
 		for (auto it = hashes.begin(); it != hashes.end(); it += 2) {
