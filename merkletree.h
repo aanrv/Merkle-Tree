@@ -20,7 +20,7 @@ public:
 	std::vector<MerkleNode::HashArray> getMerklePath(ItemType item) const;
 private:
 	/* Given a list of items and a position within a tree, calculates the hash and creates a node. */
-	MerkleNode* calculateNode(int distanceFromLeaves, std::vector<MerkleTree::ItemType>& items);
+	MerkleNode* createTree(size_t treeHeight, std::vector<MerkleTree::ItemType>& items);
 
 	/* Given two hashes, concats them and calculates their hash */
 	MerkleNode::HashArray concatHash(MerkleNode::HashArray first, MerkleNode::HashArray second) const;

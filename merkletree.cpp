@@ -14,14 +14,13 @@ using std::array;
 using std::copy;
 
 MerkleTree::MerkleTree(vector<MerkleTree::ItemType> items) {
-	// make items even if necessary
-	if (items.size() % 2 != 0) items.push_back(items.back());
 	// log2 rounded up is height of tree
-	int treeHeight = std::ceil(log2(items.size()));
-	this->head = calculateNode(treeHeight, items);
+	size_t treeHeight = std::ceil(log2(items.size())) + 1;
+	this->head = createTree(treeHeight, items);
 }
 
 MerkleTree::~MerkleTree() {
+	// TODO use smart pointers
 	delete this->head;
 }
 
@@ -29,13 +28,14 @@ MerkleNode::HashArray MerkleTree::getMerkleRoot() const {
 	return this->head->getHash();
 }
 
-MerkleNode* MerkleTree::calculateNode(int distanceFromLeaves, std::vector<MerkleTree::ItemType>& items) {
-	if (distanceFromLeaves == 0 && !items.empty()) {
-		// if items remain in list, create a leaf node here
+MerkleNode* MerkleTree::createTree(size_t treeHeight, std::vector<MerkleTree::ItemType>& items) {
+	if (treeHeight == 1 && !items.empty()) {
+	// if items remain in list, create a leaf node here
 
 		// retrieve item from list
-		MerkleTree::ItemType item = items.back();
-		items.pop_back();
+		// TODO redo with deque, vector erase front is ineffecient
+		MerkleTree::ItemType item = items.front();
+		items.erase(items.begin());
 
 		// calculate item's hash
 		array<byte, MerkleNode::HASHSIZE> digest;
@@ -44,12 +44,18 @@ MerkleNode* MerkleTree::calculateNode(int distanceFromLeaves, std::vector<Merkle
 
 		// create merkle node with calculated hash
 		return new MerkleNode(digest);
-	} else if (distanceFromLeaves > 0) {
-		// not a leaf
+	} else if (treeHeight > 1) {
+	// not a leaf
+
 		// calculate children hashes
-		// (start with right child because std::vector uses pop_back()
-		MerkleNode* rChild = calculateNode(distanceFromLeaves - 1, items);
-		MerkleNode* lChild = calculateNode(distanceFromLeaves - 1, items);
+		MerkleNode* lChild = createTree(treeHeight - 1, items);
+
+		// if no more elements remaining to make right tree
+		// right child is leaf with same hash as right child
+		// (this should happen each time the number of nodes at current depth are odd ?)
+		MerkleNode* rChild;
+		if (items.empty()) rChild = new MerkleNode(lChild->getHash());
+		else rChild = createTree(treeHeight - 1, items);
 
 		MerkleNode::HashArray hash = concatHash(lChild->getHash(), rChild->getHash());
 
@@ -59,7 +65,7 @@ MerkleNode* MerkleTree::calculateNode(int distanceFromLeaves, std::vector<Merkle
 
 		return thisNode;
 	} else {
-		// nothing to do, empty node
+	// not leaf and not ancestor of leaf
 		return NULL;
 	}
 }
@@ -78,4 +84,6 @@ MerkleNode::HashArray MerkleTree::concatHash(MerkleNode::HashArray first, Merkle
 
 	return digest;
 }
+
+
 

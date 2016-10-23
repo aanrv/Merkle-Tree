@@ -2,7 +2,6 @@
 #include <vector>
 #include <string>
 #include <algorithm>		// copy
-#include <cmath>
 #include <cryptopp/sha.h>	// SHA256
 #include <cryptopp/filters.h>	// sources, sinks, filters
 #include <cryptopp/hex.h>	// HexEncoder
@@ -56,9 +55,9 @@ int main(int argc, char** argv) {
 	}
 
 	// create tree
-//	MerkleTree testTree(items);
+	MerkleTree testTree(items);
 	// get merkle root
-//	cout << hashToHex(testTree.getMerkleRoot()) << endl;
+	cout << hashToHex(testTree.getMerkleRoot()) << endl;
 
 	// get hashes
 	vector<array<byte, HASHSIZE>> itemHashes = getHashes(items);
