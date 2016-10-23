@@ -42,10 +42,10 @@ ostream& operator<<(ostream& os, vector<array<byte, HASHSIZE>> arr);
 ostream& operator<<(ostream& os, vector<string> v);
 
 int main(int argc, char** argv) {
-	if (argc == 1) {
+	if (argc <= 1) {
 		// is this the correct notation? hmm
 		cout << "Usage: " << argv[0] << " item1 [...]" << endl;
-		return EXIT_SUCCESS;
+		return EXIT_FAILURE;
 	}
 
 	// get items
@@ -56,9 +56,15 @@ int main(int argc, char** argv) {
 
 	// create tree
 	MerkleTree testTree(items);
+
 	// get merkle root
 	cout << hashToHex(testTree.getMerkleRoot()) << endl;
 
+	// get merkle path
+	cout << "Getting merkle path for: " << argv[1] << endl;
+	cout << testTree.getMerklePath(argv[1]) << endl;
+
+	cout << "\n\n" << endl;
 	// get hashes
 	vector<array<byte, HASHSIZE>> itemHashes = getHashes(items);
 	cout << hashToHex(calculateMerkleRoot(itemHashes)) << endl;

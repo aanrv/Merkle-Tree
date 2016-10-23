@@ -16,7 +16,7 @@ public:
 	/* Retrieve tree's merkle root */
 	MerkleNode::HashArray getMerkleRoot() const;
 
-	/* Retrieve merkle path of element. Returns empty vector if element does not exist. */
+	/* Retrieve merkle path of element. Returns empty vector if single element or element does not exist. */
 	std::vector<MerkleNode::HashArray> getMerklePath(ItemType item) const;
 private:
 	/* Given a list of items and a position within a tree, calculates the hash and creates a node. */
@@ -24,6 +24,9 @@ private:
 
 	/* Given two hashes, concats them and calculates their hash */
 	MerkleNode::HashArray concatHash(MerkleNode::HashArray first, MerkleNode::HashArray second) const;
+
+	/* Returns the existence of hash within the tree. Updates stack by adding pushing opposite child to create Merkle Path. */
+	bool findHash(MerkleNode::HashArray hash, MerkleNode* tree, std::vector<MerkleNode::HashArray>& stack) const;
 
 	MerkleNode* head;
 };
