@@ -15,25 +15,20 @@ using std::array;
 using std::copy;
 
 MerkleTree::MerkleTree(vector<MerkleTree::ItemType> items) {
-	if (!items.empty()) {
-		// log2 rounded up is height of tree
-		size_t treeHeight = std::ceil(log2(items.size())) + 1;
-		this->head = createTree(treeHeight, items);
-	}
+	if (items.empty()) throw "Attempting to construct empty Merkle Tree.";
+
+	// log2 rounded up is height of tree
+	size_t treeHeight = std::ceil(log2(items.size())) + 1;
+	this->head = createTree(treeHeight, items);
 }
 
 MerkleTree::~MerkleTree() {
 	// TODO use smart pointers
-	if (this->head) delete this->head;
+	delete this->head;
 }
 
 MerkleNode::HashArray MerkleTree::getMerkleRoot() const {
-	if (this->head) {
-		return this->head->getHash();
-	} else {
-		MerkleNode::HashArray emptyHash;
-		return emptyHash;
-	}
+	return this->head->getHash();
 }
 
 vector<MerkleNode::HashArray> MerkleTree::getMerklePath(ItemType item) const {
@@ -49,9 +44,7 @@ vector<MerkleNode::HashArray> MerkleTree::getMerklePath(ItemType item) const {
 }
 
 bool MerkleTree::findHash(MerkleNode::HashArray hash, MerkleNode* tree, std::vector<MerkleNode::HashArray>& stack) const {
-	if (tree == NULL) {
-		return false;
-	} else if (tree->left == NULL && tree->right == NULL) {
+	if (tree->left == NULL && tree->right == NULL) {
 	// tree leaf, check hash
 		return tree->getHash() == hash;
 	} else {
