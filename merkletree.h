@@ -27,9 +27,6 @@ private:
 	/* Given two hashes, concats them and calculates their hash */
 	MerkleNode::HashArray concatHash(MerkleNode::HashArray first, MerkleNode::HashArray second) const;
 
-	/* Returns the existence of hash within the tree. Updates stack by adding pushing opposite child to create Merkle Path. */
-	bool findHash(MerkleNode::HashArray hash, MerkleNode* tree, std::vector<MerkleNode::HashArray>& stack) const;
-
 	MerkleNode* head;
 };
 

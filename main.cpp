@@ -13,6 +13,8 @@ using std::array;
 using std::copy;
 using std::ostream;
 
+MerkleNode::HashArray itemHash(MerkleTree::ItemType item);
+
 /* Converts a byte array to a hex string */
 string hashToHex(array<byte, MerkleNode::HASHSIZE> hash);
 
@@ -34,6 +36,7 @@ int main(int argc, char** argv) {
 
 	try {
 		cout << "Items:\n" << items << endl;
+		
 		// create tree
 		MerkleTree testTree(items);
 
@@ -57,6 +60,13 @@ int main(int argc, char** argv) {
 	return EXIT_SUCCESS;
 }
 
+MerkleNode::HashArray itemHash(MerkleTree::ItemType item) {
+	MerkleNode::HashFunction func;
+	MerkleNode::HashArray digest;
+	CryptoPP::StringSource s(item, true, new CryptoPP::HashFilter(func, new CryptoPP::ArraySink(digest.data(), MerkleNode::HASHSIZE)));
+	return digest;
+}
+
 string hashToHex(array<byte, MerkleNode::HASHSIZE> hash) {
 	string digest;
 	CryptoPP::ArraySource(hash.data(), MerkleNode::HASHSIZE, true, new CryptoPP::HexEncoder(new CryptoPP::StringSink(digest)));
@@ -76,7 +86,7 @@ ostream& operator<<(ostream& os, vector<MerkleNode::HashArray> arr) {
 ostream& operator<<(ostream& os, vector<string> v) {
 	os << "[\n";
 	for (auto it = v.begin(); it != v.end(); ++it) {
-		os << "\t" << *it;
+		os << "\t" << *it << ": " << hashToHex(itemHash(*it));
 		if (it + 1 != v.end()) os << ",\n";
 	}
 	os << "\n]" << endl;

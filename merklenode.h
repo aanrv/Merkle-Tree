@@ -15,6 +15,8 @@ public:
 
 	HashArray getHash() const;
 
+	bool findItem(HashArray hash, std::vector<HashArray>& stack) const;
+
 	MerkleNode* left;
 	MerkleNode* right;
 private:

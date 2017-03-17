@@ -39,30 +39,8 @@ vector<MerkleNode::HashArray> MerkleTree::getMerklePath(ItemType item) const {
 	StringSource s(item, true, new HashFilter(func, new ArraySink(digest.data(), MerkleNode::HASHSIZE)));
 
 	// perform DFS to find hash and modify stack to create merkle path
-	findHash(digest, this->head, stack);
+	this->head->findItem(digest, stack);
 	return stack;
-}
-
-bool MerkleTree::findHash(MerkleNode::HashArray hash, MerkleNode* tree, std::vector<MerkleNode::HashArray>& stack) const {
-	if (tree->left == NULL && tree->right == NULL) {
-	// tree leaf, check hash
-		return tree->getHash() == hash;
-	} else {
-	// not leaf, search left and right children
-	// update stack with opposite child to create merkle path
-		if (findHash(hash, tree->left, stack)) {
-		// found hash in left tree
-			stack.push_back(tree->right->getHash());
-			return true;
-		} else if (findHash(hash, tree->right, stack)) {
-		// found hash in right tree
-			stack.push_back(tree->left->getHash());
-			return true;
-		} else {
-		// hash not found in either trees
-			return false;
-		}
-	}
 }
 
 bool MerkleTree::itemExists(ItemType item) const {
