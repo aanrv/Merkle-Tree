@@ -14,6 +14,12 @@ using std::vector;
 using std::array;
 using std::copy;
 
+/* Given a list of items and a tree height, creates a tree of given height using hashes of items as leaves */
+MerkleNode* createTree(size_t treeHeight, std::vector<MerkleTree::ItemType>& items);
+
+/* Concats two given hashes and returns their concat hash */
+MerkleNode::HashArray concatHash(const MerkleNode::HashArray& first, const MerkleNode::HashArray& second);
+
 MerkleTree::MerkleTree(vector<MerkleTree::ItemType> items) {
 	if (items.empty()) throw "Attempting to construct empty Merkle Tree.";
 
@@ -53,7 +59,13 @@ bool MerkleTree::itemExists(ItemType item) const {
 	return this->head->findItem(digest, tmp);
 }
 
-MerkleNode* MerkleTree::createTree(size_t treeHeight, std::vector<MerkleTree::ItemType>& items) {
+vector<MerkleNode::HashArray> MerkleTree::getHashesAtLevel(size_t level) const {
+	vector<MerkleNode::HashArray> hashes;
+	this->head->getHashesAtLevel(level, hashes);
+	return hashes;
+}
+
+MerkleNode* createTree(size_t treeHeight, std::vector<MerkleTree::ItemType>& items) {
 	if (treeHeight == 1 && !items.empty()) {
 	// if items remain in list, create a leaf node here
 
@@ -95,7 +107,7 @@ MerkleNode* MerkleTree::createTree(size_t treeHeight, std::vector<MerkleTree::It
 	}
 }
 
-MerkleNode::HashArray MerkleTree::concatHash(const MerkleNode::HashArray& first, const MerkleNode::HashArray& second) const {
+MerkleNode::HashArray concatHash(const MerkleNode::HashArray& first, const MerkleNode::HashArray& second) {
 	// concat hashes
 	const size_t sourceLen = MerkleNode::HASHSIZE * 2;
 	array<byte, sourceLen> source;
@@ -108,11 +120,5 @@ MerkleNode::HashArray MerkleTree::concatHash(const MerkleNode::HashArray& first,
 	ArraySource(source.data(), sourceLen, true, new HashFilter(hashFunc, new ArraySink(digest.data(), MerkleNode::HASHSIZE)));
 
 	return digest;
-}
-
-vector<MerkleNode::HashArray> MerkleTree::getHashesAtLevel(size_t level) const {
-	vector<MerkleNode::HashArray> hashes;
-	this->head->getHashesAtLevel(level, hashes);
-	return hashes;
 }
 

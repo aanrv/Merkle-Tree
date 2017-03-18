@@ -26,10 +26,10 @@ public:
 	std::vector<MerkleNode::HashArray> getHashesAtLevel(size_t level) const;
 private:
 	/* Given a list of items and a position within a tree, calculates the hash and creates a node. */
-	MerkleNode* createTree(size_t treeHeight, std::vector<ItemType>& items);
+//	MerkleNode* createTree(size_t treeHeight, std::vector<ItemType>& items);
 
 	/* Given two hashes, concats them and calculates their hash */
-	MerkleNode::HashArray concatHash(const MerkleNode::HashArray& first, const MerkleNode::HashArray& second) const;
+//	MerkleNode::HashArray concatHash(const MerkleNode::HashArray& first, const MerkleNode::HashArray& second) const;
 
 	MerkleNode* head;
 };
