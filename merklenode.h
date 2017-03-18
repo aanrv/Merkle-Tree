@@ -15,7 +15,9 @@ public:
 
 	HashArray getHash() const;
 
-	bool findItem(HashArray hash, std::vector<HashArray>& stack) const;
+	bool findItem(const HashArray& hash, std::vector<HashArray>& stack) const;
+
+	void getHashesAtLevel(size_t level, std::vector<HashArray>& stack) const;
 
 	MerkleNode* left;
 	MerkleNode* right;

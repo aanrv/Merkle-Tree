@@ -19,13 +19,17 @@ public:
 	/* Retrieve merkle path of element. Returns empty vector if single element or element does not exist. */
 	std::vector<MerkleNode::HashArray> getMerklePath(ItemType item) const;
 
+	/* Checks if item's hash exists within tree */
 	bool itemExists(ItemType item) const;
+
+	/* Returns hashes from left to right at given level */
+	std::vector<MerkleNode::HashArray> getHashesAtLevel(size_t level) const;
 private:
 	/* Given a list of items and a position within a tree, calculates the hash and creates a node. */
-	MerkleNode* createTree(size_t treeHeight, std::vector<MerkleTree::ItemType>& items);
+	MerkleNode* createTree(size_t treeHeight, std::vector<ItemType>& items);
 
 	/* Given two hashes, concats them and calculates their hash */
-	MerkleNode::HashArray concatHash(MerkleNode::HashArray first, MerkleNode::HashArray second) const;
+	MerkleNode::HashArray concatHash(const MerkleNode::HashArray& first, const MerkleNode::HashArray& second) const;
 
 	MerkleNode* head;
 };

@@ -1,4 +1,7 @@
 #include "merklenode.h"
+#include <vector>
+
+using std::vector;
 
 MerkleNode::MerkleNode(MerkleNode::HashArray hash) {
 	this->hash = hash;
@@ -15,7 +18,7 @@ MerkleNode::HashArray MerkleNode::getHash() const {
 	return this->hash;
 }
 
-bool MerkleNode::findItem(MerkleNode::HashArray hash, std::vector<MerkleNode::HashArray>& stack) const {
+bool MerkleNode::findItem(const MerkleNode::HashArray& hash, std::vector<MerkleNode::HashArray>& stack) const {
 	if (this->hash == hash) {
 	// this node is hash, return true, nothing to update on stack
 		return true;
@@ -33,5 +36,14 @@ bool MerkleNode::findItem(MerkleNode::HashArray hash, std::vector<MerkleNode::Ha
 		}
 	}
 	return false;
+}
+
+void MerkleNode::getHashesAtLevel(size_t level, vector<MerkleNode::HashArray>& stack) const {
+	if (level == 0) {
+		stack.push_back(this->hash);
+	} else {
+		if (this->left) this->left->getHashesAtLevel(level - 1, stack);
+		if (this->right) this->right->getHashesAtLevel(level - 1, stack);
+	}
 }
 

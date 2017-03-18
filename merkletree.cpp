@@ -44,11 +44,13 @@ vector<MerkleNode::HashArray> MerkleTree::getMerklePath(ItemType item) const {
 }
 
 bool MerkleTree::itemExists(ItemType item) const {
-	MerkleNode::HashArray hash;
+	MerkleNode::HashArray digest;
 	MerkleNode::HashFunction func;
-	StringSource(item, true, new HashFilter(func, new ArraySink(hash.data(), MerkleNode::HASHSIZE)));
-	// probably overkill at !getMerklePath.empty() but more elegant than performing another search, hmmm
-	return this->head->getHash() == hash || !getMerklePath(item).empty();
+	StringSource s(item, true, new HashFilter(func, new ArraySink(digest.data(), MerkleNode::HASHSIZE)));
+
+
+	vector<MerkleNode::HashArray> tmp;
+	return this->head->findItem(digest, tmp);
 }
 
 MerkleNode* MerkleTree::createTree(size_t treeHeight, std::vector<MerkleTree::ItemType>& items) {
@@ -93,7 +95,7 @@ MerkleNode* MerkleTree::createTree(size_t treeHeight, std::vector<MerkleTree::It
 	}
 }
 
-MerkleNode::HashArray MerkleTree::concatHash(MerkleNode::HashArray first, MerkleNode::HashArray second) const {
+MerkleNode::HashArray MerkleTree::concatHash(const MerkleNode::HashArray& first, const MerkleNode::HashArray& second) const {
 	// concat hashes
 	const size_t sourceLen = MerkleNode::HASHSIZE * 2;
 	array<byte, sourceLen> source;
@@ -106,5 +108,11 @@ MerkleNode::HashArray MerkleTree::concatHash(MerkleNode::HashArray first, Merkle
 	ArraySource(source.data(), sourceLen, true, new HashFilter(hashFunc, new ArraySink(digest.data(), MerkleNode::HASHSIZE)));
 
 	return digest;
+}
+
+vector<MerkleNode::HashArray> MerkleTree::getHashesAtLevel(size_t level) const {
+	vector<MerkleNode::HashArray> hashes;
+	this->head->getHashesAtLevel(level, hashes);
+	return hashes;
 }
 

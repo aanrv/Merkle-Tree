@@ -7,20 +7,27 @@
 using std::cout;
 using std::cerr;
 using std::endl;
+using std::flush;
 using std::string;
 using std::vector;
 using std::array;
 using std::copy;
 using std::ostream;
 
+/* Calculates hash of item */
 MerkleNode::HashArray itemHash(MerkleTree::ItemType item);
 
 /* Converts a byte array to a hex string */
-string hashToHex(array<byte, MerkleNode::HASHSIZE> hash);
+string hashToHex(const MerkleNode::HashArray& hash);
 
-ostream& operator<<(ostream& os, vector<MerkleNode::HashArray> arr);
+/* Print tree */
+ostream& operator<<(ostream& os, const MerkleTree& tree);
 
-ostream& operator<<(ostream& os, vector<string> v);
+/* Print list of hashes */
+ostream& operator<<(ostream& os, const vector<MerkleNode::HashArray>& arr);
+
+/* Print vector of strings */
+ostream& operator<<(ostream& os, const vector<string>& v);
 
 int main(int argc, char** argv) {
 	if (argc == 1) {
@@ -35,17 +42,16 @@ int main(int argc, char** argv) {
 	}
 
 	try {
-		cout << "Items:\n" << items << endl;
+		cout << "Items:\n" << items << "\n" << endl;
 		
 		// create tree
 		MerkleTree testTree(items);
+		cout << "Tree:\n" << testTree << "\n" << endl;
 
 		// get merkle root
 		cout << "Merkle Root: " << hashToHex(testTree.getMerkleRoot()) << endl;
 
-		// verify existence
-		// unable to verify existence.
-		// are we living in a simulation? is free-will an illusion? is there an alternate universe without pain, sorrow, and segmentation faults?
+		// verify existence of an item
 		if (testTree.itemExists(argv[1])) cout << "Item: " << argv[1] << " exists." << endl;
 		else cout << "Item: " << argv[1] << " does not exist." << endl;
 
@@ -67,29 +73,43 @@ MerkleNode::HashArray itemHash(MerkleTree::ItemType item) {
 	return digest;
 }
 
-string hashToHex(array<byte, MerkleNode::HASHSIZE> hash) {
+string hashToHex(const MerkleNode::HashArray& hash) {
 	string digest;
 	CryptoPP::ArraySource(hash.data(), MerkleNode::HASHSIZE, true, new CryptoPP::HexEncoder(new CryptoPP::StringSink(digest)));
 	return digest;
 }
 
-ostream& operator<<(ostream& os, vector<MerkleNode::HashArray> arr) {
+ostream& operator<<(ostream& os, const MerkleTree& tree) {
+	os << "{\n";
+	size_t level = 0;
+	size_t nodesReturned;
+	do {
+		vector<MerkleNode::HashArray> hashes = tree.getHashesAtLevel(level);
+		if ((nodesReturned = hashes.size()) > 0) cout << hashes << endl;
+		++level;
+	} while (nodesReturned > 0);
+	os << "}" << endl;
+
+	return os;
+}
+
+ostream& operator<<(ostream& os, const vector<MerkleNode::HashArray>& arr) {
 	os << "[\n";
 	for (auto it = arr.begin(); it != arr.end(); ++it) {
 		os << "\t" << hashToHex(*it);
 		if (it + 1 != arr.end()) os << ",\n";
 	}
-	os << "\n]" << endl;
+	os << "\n]" << flush;
 	return os;
 }
 
-ostream& operator<<(ostream& os, vector<string> v) {
+ostream& operator<<(ostream& os, const vector<string>& v) {
 	os << "[\n";
 	for (auto it = v.begin(); it != v.end(); ++it) {
 		os << "\t" << *it << ": " << hashToHex(itemHash(*it));
 		if (it + 1 != v.end()) os << ",\n";
 	}
-	os << "\n]" << endl;
+	os << "\n]" << flush;
 	return os;
 
 }
