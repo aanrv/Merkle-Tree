@@ -96,6 +96,13 @@ MerkleNode::HashArray MerkleTree::getMerkleRoot() const {
 	return this->head->getHash();
 }
 
+bool MerkleTree::itemExists(ItemType item) const {
+	MerkleNode::HashArray digest = itemHash(item);
+
+	vector<MerkleNode::HashArray> tmp;
+	return this->head->findItem(digest, tmp);
+}
+
 vector<MerkleNode::HashArray> MerkleTree::getMerklePath(ItemType item) const {
 	vector<MerkleNode::HashArray> stack;
 
@@ -105,13 +112,6 @@ vector<MerkleNode::HashArray> MerkleTree::getMerklePath(ItemType item) const {
 	// perform DFS to find hash and modify stack to create merkle path
 	this->head->findItem(digest, stack);
 	return stack;
-}
-
-bool MerkleTree::itemExists(ItemType item) const {
-	MerkleNode::HashArray digest = itemHash(item);
-
-	vector<MerkleNode::HashArray> tmp;
-	return this->head->findItem(digest, tmp);
 }
 
 vector<MerkleNode::HashArray> MerkleTree::getHashesAtLevel(size_t level) const {
